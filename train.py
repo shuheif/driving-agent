@@ -47,7 +47,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", type=str)
     parser.add_argument("--epochs", default=50, type=int)
     parser.add_argument("--batch_size", default=16, type=int)
-    parser.add_argument("--fast_dev_run", default=True, type=bool)
+    parser.add_argument("--fast_dev_run", action="store_true")
     args = parser.parse_args()
     data_module = DrivingDataModule(data_dir=args.data_dir, batch_size=args.batch_size)
     data_module.setup()
