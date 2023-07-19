@@ -1,4 +1,4 @@
-from pytorch_lightning import LightningModule, Trainer
+from pytorch_lightning import LightningModule, Trainer, loggers
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import optim, nn
 from torchvision.models import resnet18, ResNet18_Weights
@@ -47,6 +47,7 @@ if __name__ == "__main__":
     parser.add_argument("--data_dir", type=str)
     parser.add_argument("--epochs", default=50, type=int)
     parser.add_argument("--batch_size", default=16, type=int)
+    parser.add_argument("--fast_dev_run", default=True, type=bool)
     args = parser.parse_args()
     data_module = DrivingDataModule(data_dir=args.data_dir, batch_size=args.batch_size)
     data_module.setup()
@@ -57,6 +58,13 @@ if __name__ == "__main__":
         monitor="val_loss",
         filename="resnet18-ep{epoch:02d}-vloss{val_loss:.2f}",
     )
-    trainer = Trainer(max_epochs=args.epochs, fast_dev_run=True, accelerator="auto", callbacks=[checkpoint_callback])
+    tb_logger = loggers.TensorBoardLogger("tb_logs", name="resnet18")
+    trainer = Trainer(
+        max_epochs=args.epochs,
+        fast_dev_run=args.fast_dev_run,
+        accelerator="auto",
+        callbacks=[checkpoint_callback],
+        logger=tb_logger,
+    )
     trainer.fit(model, train_loader, val_loader)
     trainer.test(model=model, dataloaders=test_loader)
